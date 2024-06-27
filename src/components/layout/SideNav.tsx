@@ -5,8 +5,8 @@ import {
   ListMusic,
   LogOut,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
+import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
 
 import { Button } from '../ui/button'
@@ -18,11 +18,7 @@ interface SideNavProps {
 }
 
 export function SideNav({ isOpen = true, status = false }: SideNavProps) {
-  const navigate = useNavigate()
-
-  function handleSignOut() {
-    navigate('/sign-in')
-  }
+  const { signOut } = useAuth()
 
   return (
     <div className="flex h-full flex-col">
@@ -95,7 +91,7 @@ export function SideNav({ isOpen = true, status = false }: SideNavProps) {
         className="mb-10 mt-auto flex w-full justify-start gap-1.5 p-2 text-sm font-medium leading-none text-gray-100"
         variant="ghost"
         title="Sair"
-        onClick={handleSignOut}
+        onClick={signOut}
       >
         <LogOut className="h-4 w-4" />
         <span

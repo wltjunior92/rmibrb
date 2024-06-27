@@ -23,7 +23,7 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <nav
       className={cn(
-        `relative hidden h-screen border-r border-gray-500 bg-gray-900 pt-20 md:block`,
+        `relative hidden h-screen overflow-x-hidden border-r border-gray-500 bg-gray-900 pt-20 md:block`,
         status && 'duration-500',
         isOpen ? 'w-52' : 'w-[58px]',
         className,
@@ -31,7 +31,7 @@ export function Sidebar({ className }: SidebarProps) {
     >
       <ChevronLeft
         className={cn(
-          'absolute -right-3 top-20 cursor-pointer rounded-full border border-gray-500 bg-gray-900 text-3xl text-gray-100',
+          'absolute right-4 top-20 cursor-pointer rounded-full border border-gray-500 bg-gray-900 text-3xl text-gray-100',
           !isOpen && 'rotate-180',
         )}
         onClick={handleToggle}

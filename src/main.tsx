@@ -1,3 +1,4 @@
+import './lib/dayjs.ts'
 import './global.css'
 
 import React from 'react'

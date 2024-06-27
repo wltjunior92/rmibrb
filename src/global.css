@@ -46,7 +46,7 @@
     --popover-foreground: 210 20% 98%;
 
     --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
 
     --secondary: 215 27.9% 16.9%;
     --secondary-foreground: 210 20% 98%;
@@ -72,5 +72,34 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  .closed-content-width {
+    width: calc(100vw - 58px);
+  }
+  
+  .open-content-width {
+    width: calc(100vw - 13rem);
+  }
+  
+  .dashboard-news-max-height {
+    height: calc(100vh - 168px);
+  }
+}
+
+@media (min-width: 768px) {
+  /* width */
+  ::-webkit-scrollbar {
+    @apply w-1
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    @apply border-border bg-muted rounded-sm;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground rounded-sm;
   }
 }

@@ -1,3 +1,4 @@
+import { DialogTitle } from '@radix-ui/react-dialog'
 import { MenuIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -34,9 +35,10 @@ export const MobileSidebar = () => {
         </SheetTrigger>
         <SheetContent
           side="left"
-          className="w-72 border-gray-500 bg-gray-950 text-gray-100"
+          className="z-[999999] w-72 border-gray-500 bg-gray-950 text-gray-100"
         >
-          <div className="px-1 py-6 pt-16">
+          <DialogTitle className="sr-only">Menu</DialogTitle>
+          <div className="h-full px-1 py-6 pt-16">
             <SideNav />
           </div>
         </SheetContent>
