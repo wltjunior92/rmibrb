@@ -1,14 +1,40 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+
+import { useAuth } from '@/context/AuthContext'
 
 import { Button } from '../ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../ui/card'
 
 export function NewsCard() {
+  const { teamMember } = useAuth()
   return (
     <Card className="h-svh overflow-hidden md:col-span-6 md:h-auto">
       <CardHeader>
         <div className="flex justify-between">
-          <CardTitle>Recados</CardTitle>
+          <div>
+            <CardTitle>
+              Blog Louvor Reformado
+              {teamMember?.isAdmin && (
+                <Button
+                  className="ml-4"
+                  title="Criar novo post"
+                  variant="default"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
+            </CardTitle>
+            <CardDescription className="mt-1">
+              25/05/24 às 14:38hs
+            </CardDescription>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <ChevronLeft className="h-4 w-4" />

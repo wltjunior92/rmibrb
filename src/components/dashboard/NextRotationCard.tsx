@@ -211,7 +211,9 @@ export function NextRotationCard() {
         <div className="flex justify-between">
           <div>
             <CardTitle>Próxima Escala</CardTitle>
-            <CardDescription>Domingo 30/06/2024</CardDescription>
+            <CardDescription className="mt-1">
+              Domingo 30/06/2024
+            </CardDescription>
           </div>
           <div className="flex gap-2">
             <Toggle

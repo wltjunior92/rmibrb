@@ -2,14 +2,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { ThemeToggle } from '@/components/theme/themeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import supabase from '@/lib/supabaseClient'
+import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
+import { signIn } from '@/services/signInService'
 
 import BandaImg from '../../assets/banda.png'
 import { Logo } from '../../components/Logo'
@@ -30,19 +31,22 @@ export function SignIn() {
   } = useForm<SignInForm>({
     resolver: zodResolver(signInForm),
   })
-  const navigate = useNavigate()
+
+  const { session } = useAuth()
 
   async function handleSignIn({ email, password }: SignInForm) {
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({
+    const { message } = await signIn({
       email,
       password,
     })
-    if (error) {
-      setError('Credenciais inválidas')
-      return
+    if (message) {
+      setError(message)
     }
-    navigate('/dashboard')
+  }
+
+  if (session) {
+    return <Navigate to="/dashboard" />
   }
 
   return (

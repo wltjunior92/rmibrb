@@ -10,8 +10,6 @@ import { SignIn } from './pages/auth/signIn'
 export function Router() {
   return (
     <Routes>
-      <Route path="/" element={<SignIn />} />
-
       <Route path="/sign-in" element={<SignIn />} />
 
       <Route path="/" element={<AppLayout />}>
