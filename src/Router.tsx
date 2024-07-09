@@ -1,23 +1,26 @@
-import { Route, Routes } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 
 import { AppLayout } from './pages/_layouts/AppLayout'
 import { Dashboard } from './pages/app/dashboard'
 import { Musicians } from './pages/app/musicians'
 import { Repertoire } from './pages/app/repertoire'
 import { Rotation } from './pages/app/rotation'
+import { UpsertRotation } from './pages/app/rotation/upsertRotation'
 import { SignIn } from './pages/auth/signIn'
 
-export function Router() {
-  return (
-    <Routes>
-      <Route path="/sign-in" element={<SignIn />} />
-
-      <Route path="/" element={<AppLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/escalas" element={<Rotation />} />
-        <Route path="/musicos" element={<Musicians />} />
-        <Route path="/repertorio" element={<Repertoire />} />
-      </Route>
-    </Routes>
-  )
-}
+export const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    children: [
+      { path: '/dashboard', element: <Dashboard /> },
+      { path: '/escalas', element: <Rotation /> },
+      { path: '/escalas/adicionar', element: <UpsertRotation /> },
+      { path: '/musicos', element: <Musicians /> },
+      { path: '/repertorio', element: <Repertoire /> },
+    ],
+  },
+  {
+    path: '/sign-in',
+    element: <SignIn />,
+  },
+])

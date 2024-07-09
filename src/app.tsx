@@ -1,17 +1,19 @@
-import { BrowserRouter } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { RouterProvider } from 'react-router-dom'
 
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
-import { Router } from './Router'
+import { queryClient } from './lib/react-query'
+import { router } from './Router'
 import { APP_COLOR_THEME_KEY_NAME } from './utils/constants'
 
 export function App() {
   return (
     <AuthProvider>
       <ThemeProvider storageKey={APP_COLOR_THEME_KEY_NAME}>
-        <BrowserRouter>
-          <Router />
-        </BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
       </ThemeProvider>
     </AuthProvider>
   )

@@ -9,7 +9,6 @@ import {
 
 import { TeamMember } from '@/interfaces/TeamMember'
 import supabase from '@/lib/supabaseClient'
-import { getTeamMemberData } from '@/services/signInService'
 
 type AuthProviderProps = {
   children: ReactNode
@@ -19,12 +18,15 @@ interface AuthContextType {
   session: Session | null
   teamMember: TeamMember | null
   signOut: () => Promise<void>
+  setTeamMember: (value: TeamMember | null) => void
+  isLoadingSession: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null)
+  const [isLoadingSession, setIsLoadingSession] = useState(true)
   const [teamMember, setTeamMember] = useState<TeamMember | null>(null)
 
   async function signOut() {
@@ -37,24 +39,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     _event: AuthChangeEvent,
     session: Session | null,
   ) {
-    return new Promise<void>((resolve, reject) => {
-      setSession(session)
-      if (!session) {
-        setTeamMember(null)
-        resolve()
-      }
-      getTeamMemberData({
-        id: session!.user.id,
-        email: session!.user.email,
-        phone: session!.user.phone,
-      })
-        .then((data) => setTeamMember(data))
-        .catch((error) => reject(error))
-        .finally(() => resolve())
-    })
+    setSession(session)
+    if (!session) {
+      setTeamMember(null)
+    }
+    setIsLoadingSession(false)
   }
 
   useEffect(() => {
+    setIsLoadingSession(true)
     const { data: authListener } =
       supabase.auth.onAuthStateChange(updateSessionData)
 
@@ -64,7 +57,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ session, signOut, teamMember }}>
+    <AuthContext.Provider
+      value={{ session, signOut, teamMember, setTeamMember, isLoadingSession }}
+    >
       {children}
     </AuthContext.Provider>
   )

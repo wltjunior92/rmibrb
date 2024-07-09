@@ -1,5 +1,6 @@
 import { Dayjs } from 'dayjs'
 import { CirclePlus, Eye, Pencil } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
 
@@ -206,12 +207,15 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
           </Accordion>
         </div>
       ) : (
-        <div className="flex min-h-[450px] flex-1 cursor-pointer flex-col items-center justify-center rounded-md text-muted-foreground duration-200 hover:bg-accent hover:text-foreground">
+        <Link
+          to={`/escalas/adicionar?date=${date.toISOString()}`}
+          className="flex min-h-[450px] flex-1 cursor-pointer flex-col items-center justify-center rounded-md text-muted-foreground duration-200 hover:bg-accent hover:text-foreground"
+        >
           <div className="flex flex-col items-center justify-center gap-2">
             <CirclePlus className="h-6 w-6" />
             <span>Adicionar</span>
           </div>
-        </div>
+        </Link>
       )}
     </div>
   )

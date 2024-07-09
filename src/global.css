@@ -85,6 +85,10 @@
   .dashboard-news-max-height {
     height: calc(100vh - 168px);
   }
+
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    @apply bg-none
+  }
 }
 
 @media (min-width: 768px) {

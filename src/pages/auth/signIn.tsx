@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { ThemeToggle } from '@/components/theme/themeToggle'
@@ -34,7 +34,13 @@ export function SignIn() {
 
   const { session } = useAuth()
 
+  const navigate = useNavigate()
+
   async function handleSignIn({ email, password }: SignInForm) {
+    if (session && session.user.email === email) {
+      navigate('/dashboard', { replace: true })
+      return
+    }
     setError('')
     const { message } = await signIn({
       email,
@@ -42,11 +48,9 @@ export function SignIn() {
     })
     if (message) {
       setError(message)
+      return
     }
-  }
-
-  if (session) {
-    return <Navigate to="/dashboard" />
+    navigate('/dashboard')
   }
 
   return (

@@ -1,88 +1,18 @@
 import dayjs from 'dayjs'
 import { CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { RotationCard, RotationProps } from '@/components/rotation/RotationCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getEventsByMonth } from '@/services/rotationsService'
 import { capitalizeFirstLetter } from '@/utils/capitalizeFirstLetter'
 import { countSundaysInMonth } from '@/utils/countSundaysInMonth'
 
-const rotationExample: RotationProps['rotation'] = {
-  coordenador: {
-    id: '1',
-    name: 'Fulano',
-    userFunction: 'Tenor',
-  },
-  voices: [
-    {
-      id: '2',
-      name: 'Voz 1',
-      userFunction: 'Barítono',
-    },
-    {
-      id: '3',
-      name: 'Voz 2',
-      userFunction: 'Soprano',
-    },
-    {
-      id: '4',
-      name: 'Voz 3',
-      userFunction: 'Contralto',
-    },
-    {
-      id: '5',
-      name: 'Voz 4',
-      userFunction: 'Baixo',
-    },
-  ],
-  instrumental: [
-    {
-      id: '6',
-      name: 'Instrumental 1',
-      userFunction: 'Baixo',
-    },
-    {
-      id: '7',
-      name: 'Instrumental 2',
-      userFunction: 'Violão',
-    },
-    {
-      id: '8',
-      name: 'Instrumental 3',
-      userFunction: 'Guitarra',
-    },
-    {
-      id: '9',
-      name: 'Instrumental 4',
-      userFunction: 'Teclado',
-    },
-    {
-      id: '10',
-      name: 'Instrumental 5',
-      userFunction: 'Trompete',
-    },
-  ],
-  soundDesign: [
-    {
-      id: '11',
-      name: 'Sonoplasta 1',
-    },
-  ],
-  dataShow: [
-    {
-      id: '12',
-      name: 'Data Show 1',
-    },
-    {
-      id: '13',
-      name: 'Data Show 2',
-    },
-  ],
-}
-
 export function Rotation() {
   const [date, setDate] = useState(new Date())
+
   const rotationTitle = capitalizeFirstLetter(
     dayjs(date).format('MMMM [de] YYYY'),
   )
@@ -90,19 +20,14 @@ export function Rotation() {
   const eventsCP = countSundaysInMonth(date).map((item) => {
     return {
       date: item,
-      rotation:
-        dayjs(new Date()).month() === item.month()
-          ? rotationExample
-          : undefined,
+      rotation: undefined,
     }
   }) as RotationProps[]
+
   const eventsEBD = countSundaysInMonth(date).map((item) => {
     return {
       date: item,
-      rotation:
-        dayjs(new Date()).month() === item.month()
-          ? rotationExample
-          : undefined,
+      rotation: undefined,
     }
   }) as RotationProps[]
 
@@ -115,6 +40,10 @@ export function Rotation() {
       }
     })
   }
+
+  useEffect(() => {
+    getEventsByMonth(dayjs(date))
+  }, [date])
 
   return (
     <div className="flex w-full flex-col">
@@ -144,9 +73,11 @@ export function Rotation() {
           <CardHeader>
             <div className="flex justify-between">
               <CardTitle>Culto Público</CardTitle>
-              <Button>
-                <CalendarPlus className="mr-2 h-4 w-4" />
-                Adicionar
+              <Button asChild>
+                <Link to="/escalas/adicionar">
+                  <CalendarPlus className="mr-2 h-4 w-4" />
+                  Adicionar
+                </Link>
               </Button>
             </div>
           </CardHeader>
@@ -161,7 +92,7 @@ export function Rotation() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-12 md:mt-4">
+        <Card className="col-span-12 md:mt-6">
           <CardHeader>
             <div className="flex justify-between">
               <CardTitle>EBD.</CardTitle>

@@ -49,44 +49,51 @@ interface GetTeamMemberDataParams {
 }
 
 export async function getTeamMemberData(user: GetTeamMemberDataParams) {
-  const { data, error: err } = await supabase
-    .from('team_members')
-    .select(
-      `
-        *,
-        team_members_functions (
-          id,
-          function_groups (
-            function_types,
-            function
+  try {
+    const { data, error: err } = await supabase
+      .from('team_members')
+      .select(
+        `
+          *,
+          team_members_functions (
+            id,
+            function_groups (
+              function_types,
+              function
+            )
           )
-        )
-      `,
-    )
-    .eq('user_id', user.id)
-    .limit(1)
+        `,
+      )
+      .eq('id', '4496010e-85df-42e7-b7a9-16cf3484ce6a')
+      .limit(1)
 
-  if (err) throw new Error(err)
+    if (err) {
+      console.log(err)
+      throw new Error(err)
+    }
 
-  const [userCompleteDate] = data
-  const teamMember: TeamMember = {
-    user: {
-      id: user.id,
-      email: user.email || '',
-      phone: user.phone || '',
-    },
-    id: userCompleteDate.id,
-    name: userCompleteDate.name,
-    avatarUrl: userCompleteDate.avatar_url,
-    createdAt: userCompleteDate.created_at,
-    isActive: userCompleteDate.is_active,
-    isAdmin: userCompleteDate.is_admin,
-    functions: userCompleteDate.team_members_functions.map((item: any) => ({
-      id: item.id,
-      name: item.function_groups.function,
-      type: item.function_groups.function_types,
-    })),
+    const [userCompleteDate] = data
+    const teamMember: TeamMember = {
+      user: {
+        id: user.id,
+        email: user.email || '',
+        phone: user.phone || '',
+      },
+      id: userCompleteDate.id,
+      name: userCompleteDate.name,
+      avatarUrl: userCompleteDate.avatar_url,
+      createdAt: userCompleteDate.created_at,
+      isActive: userCompleteDate.is_active,
+      isAdmin: userCompleteDate.is_admin,
+      functions: userCompleteDate.team_members_functions.map((item: any) => ({
+        id: item.id,
+        name: item.function_groups.function,
+        type: item.function_groups.function_types,
+      })),
+    }
+
+    return teamMember
+  } catch (error) {
+    return null
   }
-
-  return teamMember
 }
