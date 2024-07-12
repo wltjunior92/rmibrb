@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 
 import Header from '@/components/layout/Header'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { Toaster } from '@/components/ui/toaster'
 import { useAuth } from '@/context/AuthContext'
 import { useSidebar } from '@/hooks/useSidebar'
 import { cn } from '@/lib/utils'
@@ -49,6 +50,7 @@ export function AppLayout() {
             )}
           >
             <Outlet />
+            <Toaster />
           </main>
         </div>
       </div>

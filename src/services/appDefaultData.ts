@@ -59,6 +59,7 @@ export interface TeamMembersResponse {
   id: string
   name: string
   avatar_url: string | null
+  current_function?: string
   roles: {
     function_groups: {
       id: string

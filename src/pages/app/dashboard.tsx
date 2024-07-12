@@ -2,11 +2,8 @@ import dayjs from 'dayjs'
 
 import { NewsCard } from '@/components/dashboard/NewsCard'
 import { NextRotationCard } from '@/components/dashboard/NextRotationCard'
-import { useAuth } from '@/context/AuthContext'
 
 export function Dashboard() {
-  const { teamMember } = useAuth()
-  console.log(teamMember)
   const year = dayjs(new Date()).year()
   return (
     <div className="flex w-full flex-col">

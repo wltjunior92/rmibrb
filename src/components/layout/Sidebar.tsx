@@ -31,7 +31,7 @@ export function Sidebar({ className }: SidebarProps) {
     >
       <ChevronLeft
         className={cn(
-          'absolute right-4 top-20 cursor-pointer rounded-full border border-gray-500 bg-gray-900 text-3xl text-gray-100',
+          'absolute right-4 top-20 cursor-pointer rounded-full bg-gray-900 text-3xl text-gray-100',
           !isOpen && 'rotate-180',
         )}
         onClick={handleToggle}

@@ -1,35 +1,25 @@
 import dayjs from 'dayjs'
 import { CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { RotationCard, RotationProps } from '@/components/rotation/RotationCard'
+import { RotationCard } from '@/components/rotation/RotationCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getEventsByMonth } from '@/services/rotationsService'
+import { getEventsByMonth, RotationByMonth } from '@/services/rotationsService'
 import { capitalizeFirstLetter } from '@/utils/capitalizeFirstLetter'
-import { countSundaysInMonth } from '@/utils/countSundaysInMonth'
 
 export function Rotation() {
+  const [isLoading, setIsLoading] = useState(true)
+
   const [date, setDate] = useState(new Date())
+
+  const [eventsCP, setEventsCP] = useState<RotationByMonth[]>([])
+  const [eventsEBD, setEventsEBD] = useState<RotationByMonth[]>([])
 
   const rotationTitle = capitalizeFirstLetter(
     dayjs(date).format('MMMM [de] YYYY'),
   )
-
-  const eventsCP = countSundaysInMonth(date).map((item) => {
-    return {
-      date: item,
-      rotation: undefined,
-    }
-  }) as RotationProps[]
-
-  const eventsEBD = countSundaysInMonth(date).map((item) => {
-    return {
-      date: item,
-      rotation: undefined,
-    }
-  }) as RotationProps[]
 
   function handleNextMonth(action: 'add' | 'subtract') {
     setDate((state) => {
@@ -41,9 +31,18 @@ export function Rotation() {
     })
   }
 
-  useEffect(() => {
-    getEventsByMonth(dayjs(date))
+  const fetchRotations = useCallback(async () => {
+    const eventsCP = await getEventsByMonth(dayjs(date), 'Culto Público')
+    const eventsEBD = await getEventsByMonth(dayjs(date), 'EBD.')
+
+    setEventsCP(eventsCP)
+    setEventsEBD(eventsEBD)
   }, [date])
+
+  useEffect(() => {
+    setIsLoading(true)
+    fetchRotations().finally(() => setIsLoading(false))
+  }, [date, fetchRotations])
 
   return (
     <div className="flex w-full flex-col">
@@ -85,8 +84,12 @@ export function Rotation() {
           <CardContent>
             <div className="flex w-full flex-1 gap-2 overflow-x-auto pb-2">
               {eventsCP &&
-                eventsCP.map((item) => (
-                  <RotationCard key={item.date.toISOString()} data={item} />
+                eventsCP.map((item, index) => (
+                  <RotationCard
+                    key={item?.id || index}
+                    data={item}
+                    eventType="Culto Público"
+                  />
                 ))}
             </div>
           </CardContent>
@@ -106,8 +109,12 @@ export function Rotation() {
           <CardContent>
             <div className="flex w-full flex-1 gap-2 overflow-x-auto pb-2">
               {eventsEBD &&
-                eventsEBD.map((item) => (
-                  <RotationCard key={item.date.toISOString()} data={item} />
+                eventsEBD.map((item, index) => (
+                  <RotationCard
+                    key={item?.id || index}
+                    data={item}
+                    eventType="EBD."
+                  />
                 ))}
             </div>
           </CardContent>

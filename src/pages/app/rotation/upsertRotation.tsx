@@ -2,9 +2,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import dayjs from 'dayjs'
 import { CalendarIcon, Check, ChevronsUpDown, LoaderCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
 import {
@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useToast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 import {
   getEventTypesSelectData,
@@ -52,8 +53,10 @@ import {
   TeamMembersResponse as TeamMember,
 } from '@/services/appDefaultData'
 import {
+  getRotationById,
   insertRotation,
   InsertRotationParams,
+  updateRotation,
 } from '@/services/rotationsService'
 
 const rotationForm = z.object({
@@ -129,9 +132,12 @@ const rotationForm = z.object({
   ),
 })
 
-type RotationForm = z.infer<typeof rotationForm>
+export type RotationForm = z.infer<typeof rotationForm>
 
 export function UpsertRotation() {
+  const { toast } = useToast()
+
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(true)
 
   const [eventTypes, setEventTypes] = useState<string[]>(['Carregando'])
@@ -145,11 +151,14 @@ export function UpsertRotation() {
   const selectedDate = searchParams.get('date')
     ? new Date(searchParams.get('date') || '')
     : undefined
+  const selectedEventType = searchParams.get('event_type') || undefined
+
+  const rotationId = searchParams.get('id') || undefined
 
   const form = useForm<RotationForm>({
     resolver: zodResolver(rotationForm),
     defaultValues: {
-      event_type: 'Culto Público',
+      event_type: selectedEventType,
       date: selectedDate,
       voices_team_rotation_members: [],
       instrumentalists_team_rotation_members: [],
@@ -194,7 +203,25 @@ export function UpsertRotation() {
         }),
       ),
     }
-    await insertRotation(newRotation)
+    let result
+    if (!rotationId) {
+      result = await insertRotation(newRotation)
+    } else {
+      result = await updateRotation(newRotation, rotationId)
+    }
+
+    if (!result.success) {
+      toast({
+        variant: 'destructive',
+        description: result.message,
+      })
+      return
+    }
+    toast({
+      variant: 'success',
+      description: result.message,
+    })
+    navigate('/escalas')
   }
 
   async function fetchFormData() {
@@ -212,9 +239,32 @@ export function UpsertRotation() {
     field: any,
     previousValue: TeamMember[],
   ) {
-    if (voices.some((item) => item.id === value.id)) return
+    const lists = [
+      ...voices,
+      ...instrumentalists,
+      ...soundDesigners,
+      ...dataShowList,
+    ]
+    if (lists.some((item) => item.id === value.id)) {
+      toast({
+        variant: 'warning',
+        description: 'Essa pessoa já foi adicionada em outra função',
+        duration: 2500,
+      })
+      return
+    }
     const newArr = [...previousValue]
-    newArr.push(value)
+    if (
+      field === 'voices_team_rotation_members' ||
+      field === 'instrumentalists_team_rotation_members'
+    ) {
+      newArr.push({
+        ...value,
+        current_function: value.roles[0].function_groups.function,
+      })
+    } else {
+      newArr.push(value)
+    }
     setValue(field, newArr)
   }
 
@@ -246,13 +296,50 @@ export function UpsertRotation() {
     fetchFormData().finally(() => setIsLoading(false))
   }, [])
 
+  const fetchEditRotation = useCallback(async () => {
+    if (!rotationId) {
+      return
+    }
+    const { data, message } = await getRotationById(rotationId)
+
+    if (message) {
+      toast({
+        variant: 'destructive',
+        description: message,
+      })
+      return
+    }
+    setValue('event_type', data!.event_type)
+    setValue('date', data!.date)
+    setValue('rehearsal_time', data!.rehearsal_time)
+    setValue('coordinator_id', data!.coordinator_id)
+    setValue('voices_team_rotation_members', data!.voices_team_rotation_members)
+    setValue(
+      'instrumentalists_team_rotation_members',
+      data!.instrumentalists_team_rotation_members,
+    )
+    setValue(
+      'sound_designers_team_rotation_members',
+      data!.sound_designers_team_rotation_members,
+    )
+    setValue(
+      'data_show_team_rotation_members',
+      data!.data_show_team_rotation_members,
+    )
+  }, [rotationId, toast, setValue])
+
+  useEffect(() => {
+    setIsLoading(true)
+    fetchEditRotation().finally(() => setIsLoading(false))
+  }, [fetchEditRotation])
+
   if (isLoading) {
     return <LoaderCircle className="animate-spin" />
   }
 
   return (
     <div className="flex w-full flex-col">
-      <h1 className="mb-6 text-2xl font-bold">Criar nova escala</h1>
+      <h1 className="mb-6 text-2xl font-bold">{`${rotationId ? 'Editar' : 'Criar nova'} escala`}</h1>
       <main className="grid grid-cols-1 gap-4 md:grid-cols-12">
         <Card className="col-span-12 pt-4">
           <CardContent className="p-2 md:p-6">
@@ -269,7 +356,7 @@ export function UpsertRotation() {
                       <FormLabel className="mb-1">Tipo de evento</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue="Culto Público"
+                        defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -333,7 +420,12 @@ export function UpsertRotation() {
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel className="mb-1">Horário do ensaio</FormLabel>
-                      <Input type="time" step={60} onChange={field.onChange} />
+                      <Input
+                        type="time"
+                        step={60}
+                        onChange={field.onChange}
+                        defaultValue={field.value}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}

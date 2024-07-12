@@ -1,8 +1,9 @@
-import { Dayjs } from 'dayjs'
-import { CirclePlus, Eye, Pencil } from 'lucide-react'
+import { CirclePlus, ListMusic, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { useAuth } from '@/context/AuthContext'
 import { cn } from '@/lib/utils'
+import { RotationByMonth } from '@/services/rotationsService'
 
 import { AccordionLabel } from '../AccordionLabel'
 import {
@@ -21,51 +22,36 @@ import {
   TableRow,
 } from '../ui/table'
 
-interface User {
-  id: string
-  name: string
-  userFunction?: string
-}
-
-export interface RotationProps {
-  date: Dayjs
-  rotation?: {
-    coordenador: User
-    voices: User[]
-    instrumental: User[]
-    soundDesign: User[]
-    dataShow: User[]
-  }
-}
-
 interface RotationCardProps {
-  data: RotationProps
+  data: RotationByMonth
+  eventType: 'Culto Público' | 'EBD.'
 }
 
-const userId = '5'
-
-export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
+export function RotationCard({ data, eventType }: RotationCardProps) {
+  const { teamMember } = useAuth()
   return (
     <div className="flex min-w-72 flex-1 flex-col gap-2 rounded-md border p-2 md:min-w-fit md:p-4">
       <div className="mb-4 flex items-center justify-between">
-        <Button variant="ghost" size="icon" disabled={!rotation}>
-          <Pencil className="h-4 w-4" />
+        <Button variant="ghost" size="icon" disabled={!data.id}>
+          <Link to={`/escalas/adicionar?id=${data.id}`}>
+            <Pencil className="h-4 w-4" />
+          </Link>
         </Button>
         <strong className="flex-1 text-center">
-          {date.format('DD[/]MM[/]YY')}
+          {data.date.format('DD[/]MM[/]YY')}
         </strong>
-        <Button variant="ghost" size="icon" disabled={!rotation}>
-          <Eye className="h-4 w-4" />
+        <Button variant="ghost" size="icon" disabled={!data.id}>
+          <ListMusic className="h-4 w-4" />
         </Button>
       </div>
 
-      {rotation ? (
+      {data.id ? (
         <div className="flex flex-col gap-1">
           <Table className="mb-2 overflow-hidden rounded-sm">
             <TableBody>
               <TableRow>
                 <TableCell className="font-bold">Coordenador</TableCell>
-                <TableCell>{rotation.coordenador.name || ''}</TableCell>
+                <TableCell>{data.coordinator?.name}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -74,7 +60,9 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
             <AccordionItem value="vozes" className="mb-2 border-b-0">
               <AccordionTrigger className="rounded-sm bg-muted px-2">
                 <AccordionLabel
-                  hasUser={rotation.voices.some((item) => item.id === userId)}
+                  hasUser={data.voices_team_rotation_members?.some(
+                    (item) => item.team_member.name === teamMember?.name,
+                  )}
                   title="Vozes"
                   tooltipMessage="Parece que você está escalado por aqui 😬"
                 />
@@ -88,18 +76,18 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rotation.voices &&
-                      rotation.voices.map((voz) => (
+                    {data.voices_team_rotation_members &&
+                      data.voices_team_rotation_members.map((voz) => (
                         <TableRow
                           key={voz.id}
                           className={cn(
-                            voz.id === userId &&
+                            voz.id === teamMember?.name &&
                               'bg-primary/50 hover:bg-primary hover:text-primary-foreground',
                           )}
                         >
-                          <TableCell>{voz.name}</TableCell>
+                          <TableCell>{voz.team_member.name}</TableCell>
                           <TableCell className="text-right">
-                            {voz.userFunction}
+                            {voz.current_function}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -111,8 +99,8 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
             <AccordionItem value="instrumental" className="mb-2 border-b-0">
               <AccordionTrigger className="rounded-sm bg-muted px-2">
                 <AccordionLabel
-                  hasUser={rotation.instrumental.some(
-                    (item) => item.id === userId,
+                  hasUser={data.instrumentalists_team_rotation_members?.some(
+                    (item) => item.team_member.name === teamMember?.name,
                   )}
                   title="Instrumental"
                   tooltipMessage="Parece que você está escalado por aqui 😬"
@@ -127,21 +115,26 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rotation.instrumental &&
-                      rotation.instrumental.map((instrumentalist) => (
-                        <TableRow
-                          key={instrumentalist.id}
-                          className={cn(
-                            instrumentalist.id === userId &&
-                              'bg-primary/50 hover:bg-primary hover:text-primary-foreground',
-                          )}
-                        >
-                          <TableCell>{instrumentalist.name}</TableCell>
-                          <TableCell className="text-right">
-                            {instrumentalist.userFunction}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    {data.instrumentalists_team_rotation_members &&
+                      data.instrumentalists_team_rotation_members.map(
+                        (instrumentalist) => (
+                          <TableRow
+                            key={instrumentalist.id}
+                            className={cn(
+                              instrumentalist.team_member.name ===
+                                teamMember?.name &&
+                                'bg-primary/50 hover:bg-primary hover:text-primary-foreground',
+                            )}
+                          >
+                            <TableCell>
+                              {instrumentalist.team_member.name}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {instrumentalist.current_function}
+                            </TableCell>
+                          </TableRow>
+                        ),
+                      )}
                   </TableBody>
                 </Table>
               </AccordionContent>
@@ -150,8 +143,8 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
             <AccordionItem value="soundDesign" className="mb-2 border-b-0">
               <AccordionTrigger className="rounded-sm bg-muted px-2">
                 <AccordionLabel
-                  hasUser={rotation.soundDesign.some(
-                    (item) => item.id === userId,
+                  hasUser={data.sound_designers_team_rotation_members?.some(
+                    (item) => item.team_member.name === teamMember?.name,
                   )}
                   title="Sonoplastia"
                   tooltipMessage="Parece que você está escalado por aqui 😬"
@@ -160,18 +153,23 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
               <AccordionContent>
                 <Table>
                   <TableBody>
-                    {rotation.soundDesign &&
-                      rotation.soundDesign.map((soundDesigner) => (
-                        <TableRow
-                          key={soundDesigner.id}
-                          className={cn(
-                            soundDesigner.id === userId &&
-                              'bg-primary/50 hover:bg-primary hover:text-primary-foreground',
-                          )}
-                        >
-                          <TableCell>{soundDesigner.name}</TableCell>
-                        </TableRow>
-                      ))}
+                    {data.sound_designers_team_rotation_members &&
+                      data.sound_designers_team_rotation_members.map(
+                        (soundDesigner) => (
+                          <TableRow
+                            key={soundDesigner.id}
+                            className={cn(
+                              soundDesigner.team_member.name ===
+                                teamMember?.name &&
+                                'bg-primary/50 hover:bg-primary hover:text-primary-foreground',
+                            )}
+                          >
+                            <TableCell>
+                              {soundDesigner.team_member.name}
+                            </TableCell>
+                          </TableRow>
+                        ),
+                      )}
                   </TableBody>
                 </Table>
               </AccordionContent>
@@ -180,7 +178,9 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
             <AccordionItem value="dataShow" className="mb-2 border-b-0">
               <AccordionTrigger className="rounded-sm bg-muted px-2">
                 <AccordionLabel
-                  hasUser={rotation.dataShow.some((item) => item.id === userId)}
+                  hasUser={data.data_show_team_rotation_members?.some(
+                    (item) => item.team_member.name === teamMember?.name,
+                  )}
                   title="Data Show"
                   tooltipMessage="Parece que você está escalado por aqui 😬"
                 />
@@ -188,16 +188,16 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
               <AccordionContent>
                 <Table>
                   <TableBody>
-                    {rotation.dataShow &&
-                      rotation.dataShow.map((person) => (
+                    {data.data_show_team_rotation_members &&
+                      data.data_show_team_rotation_members.map((person) => (
                         <TableRow
                           key={person.id}
                           className={cn(
-                            person.id === userId &&
+                            person.team_member.name === teamMember?.name &&
                               'bg-primary/50 hover:bg-primary hover:text-primary-foreground',
                           )}
                         >
-                          <TableCell>{person.name}</TableCell>
+                          <TableCell>{person.team_member.name}</TableCell>
                         </TableRow>
                       ))}
                   </TableBody>
@@ -208,7 +208,7 @@ export function RotationCard({ data: { date, rotation } }: RotationCardProps) {
         </div>
       ) : (
         <Link
-          to={`/escalas/adicionar?date=${date.toISOString()}`}
+          to={`/escalas/adicionar?date=${data.date.toISOString()}&event_type=${eventType}`}
           className="flex min-h-[450px] flex-1 cursor-pointer flex-col items-center justify-center rounded-md text-muted-foreground duration-200 hover:bg-accent hover:text-foreground"
         >
           <div className="flex flex-col items-center justify-center gap-2">

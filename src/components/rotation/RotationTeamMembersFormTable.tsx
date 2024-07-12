@@ -163,77 +163,78 @@ export function RotationTeamMembersFormTable({
         </div>
       ) : (
         <div className="mt-2 overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead></TableHead>
-                <TableHead>Nome</TableHead>
-                {fieldType !== 'data_show_team_rotation_members' &&
-                  fieldType !== 'sound_designers_team_rotation_members' && (
-                    <TableHead>Tipo</TableHead>
-                  )}
-                <TableHead className="text-right">Ação</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {membersList.length !== 0 &&
-                membersList.map((item, memberIndex) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="max-w-6">
-                      <Avatar>
-                        <AvatarImage src={item.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {getAvatarFallback(item.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    {fieldType !== 'data_show_team_rotation_members' &&
-                      fieldType !== 'sound_designers_team_rotation_members' &&
-                      onChangeRole && (
-                        <TableCell>
-                          <Select
-                            onValueChange={(value) =>
-                              onChangeRole(fieldType, value, memberIndex)
-                            }
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue
-                                placeholder="Selecione a função"
-                                defaultValue={
-                                  item.roles[0].function_groups.function
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {item.roles.map((role) => (
-                                <SelectItem
-                                  key={`${role.function_groups.id}-${item.id}`}
-                                  value={role.function_groups.function}
-                                >
-                                  {role.function_groups.function}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      )}
-                    <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          handleRemoveMember(item.id, fieldType, membersList)
-                        }
-                        variant="ghost"
-                        size="xs"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+          <div className="flex w-full flex-1 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead></TableHead>
+                  <TableHead>Nome</TableHead>
+                  {fieldType !== 'data_show_team_rotation_members' &&
+                    fieldType !== 'sound_designers_team_rotation_members' && (
+                      <TableHead>Tipo</TableHead>
+                    )}
+                  <TableHead className="text-right">Ação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {membersList.length !== 0 &&
+                  membersList.map((item, memberIndex) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="md:max-w-6">
+                        <Avatar>
+                          <AvatarImage src={item.avatar_url || undefined} />
+                          <AvatarFallback>
+                            {getAvatarFallback(item.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>{item.name}</TableCell>
+                      {fieldType !== 'data_show_team_rotation_members' &&
+                        fieldType !== 'sound_designers_team_rotation_members' &&
+                        onChangeRole && (
+                          <TableCell>
+                            <Select
+                              onValueChange={(value) =>
+                                onChangeRole(fieldType, value, memberIndex)
+                              }
+                              value={
+                                item.current_function ||
+                                item.roles[0].function_groups.function
+                              }
+                            >
+                              <SelectTrigger className="max-w-[180px]">
+                                <SelectValue placeholder="Selecione a função" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {item.roles.map((role) => (
+                                  <SelectItem
+                                    key={`${role.function_groups.id}-${item.id}`}
+                                    value={role.function_groups.function}
+                                  >
+                                    {role.function_groups.function}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        )}
+                      <TableCell className="text-right">
+                        <Button
+                          type="button"
+                          onClick={() =>
+                            handleRemoveMember(item.id, fieldType, membersList)
+                          }
+                          variant="ghost"
+                          size="xs"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </div>
