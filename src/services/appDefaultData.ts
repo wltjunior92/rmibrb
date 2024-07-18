@@ -126,3 +126,43 @@ export async function getPossibleTeamMembers(): Promise<GetPossibleTeamMembersRe
     teamMembersDataShow,
   }
 }
+
+export async function getAllRoles() {
+  try {
+    const { data, error } = await supabase
+      .from('function_groups')
+      .select('id, function_types, function')
+
+    if (error) throw error
+
+    const result = data.map((item: any) => ({
+      id: item.id,
+      type: item.function_types,
+      role: item.function,
+    }))
+
+    const voices = result.filter((item: any) => item.type === 'Voz')
+    const instrumental = result.filter(
+      (item: any) => item.type === 'Instrumental',
+    )
+    const soundDesign = result.filter(
+      (item: any) => item.type === 'Sonoplastia',
+    )
+    const dataShow = result.filter((item: any) => item.type === 'Data Show')
+
+    return {
+      voices,
+      instrumental,
+      soundDesign,
+      dataShow,
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return {
+    voices: [],
+    instrumental: [],
+    soundDesign: [],
+    dataShow: [],
+  }
+}

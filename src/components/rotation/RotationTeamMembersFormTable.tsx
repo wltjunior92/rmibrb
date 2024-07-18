@@ -9,6 +9,7 @@ import {
 } from 'react-icons/gi'
 
 import { TeamMembersResponse as TeamMember } from '@/services/appDefaultData'
+import { getAvatarFallback } from '@/utils/getAvatarFallback'
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
@@ -85,11 +86,6 @@ export function RotationTeamMembersFormTable({
       return value
     }
     return str.trim()
-  }
-
-  function getAvatarFallback(name: string) {
-    const [firstName, secondName] = name.toUpperCase().split(' ')
-    return `${firstName[0]}${secondName[0]}`
   }
 
   function getInstrumentalIcon(role: string) {

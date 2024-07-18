@@ -74,6 +74,10 @@
     @apply bg-background text-foreground;
   }
 
+  html {
+    overflow: hidden;
+  }
+
   .closed-content-width {
     width: calc(100vw - 58px);
   }

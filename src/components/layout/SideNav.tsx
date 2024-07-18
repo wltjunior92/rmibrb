@@ -57,8 +57,8 @@ export function SideNav({ isOpen = true, status = false }: SideNavProps) {
           </span>
         </NavItem>
         <NavItem
-          to="/musicos"
-          title="Músicos"
+          to="/equipe"
+          title="Equipe"
           className="flex items-center gap-1.5 rounded-sm p-2 font-medium text-gray-100 hover:bg-primary data-[current=true]:bg-primary"
         >
           <BookUser className="h-4 w-4" />
@@ -68,7 +68,7 @@ export function SideNav({ isOpen = true, status = false }: SideNavProps) {
               isOpen ? 'inline' : 'hidden',
             )}
           >
-            Musicos
+            Equipe
           </span>
         </NavItem>
         <NavItem
